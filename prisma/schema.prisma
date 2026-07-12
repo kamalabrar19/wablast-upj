@@ -1,0 +1,200 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  admin
+  staff
+}
+
+enum BlastStatus {
+  draft
+  scheduled
+  sending
+  completed
+  failed
+}
+
+enum TargetStatus {
+  pending
+  sent
+  failed
+  read
+  replied
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String
+  role          Role      @default(staff)
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts Account[]
+  sessions Session[]
+
+  contacts         Contact[]
+  blasts           Blast[]
+  messageTemplates MessageTemplate[]
+  waSession        WhatsAppSession?
+
+  @@index([email])
+}
+
+model WhatsAppSession {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  creds     String   // JSON string dari Baileys auth state
+  connected Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Contact {
+  id          String   @id @default(cuid())
+  name        String
+  phoneNumber String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdById String
+
+  createdBy    User               @relation(fields: [createdById], references: [id])
+  groupMembers ContactGroupMember[]
+  blastTargets BlastTarget[]
+
+  @@unique([phoneNumber, createdById])
+  @@index([phoneNumber])
+  @@index([createdById])
+}
+
+model ContactGroup {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+
+  members ContactGroupMember[]
+  blasts  BlastGroup[]
+}
+
+model ContactGroupMember {
+  contactId String
+  groupId   String
+
+  contact Contact      @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  group   ContactGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@id([contactId, groupId])
+}
+
+model Blast {
+  id              String       @id @default(cuid())
+  title           String
+  messageTemplate String
+  footer          String?      @db.Text
+  imageUrl        String?
+  delayMs         Int          @default(3000)
+  status          BlastStatus  @default(draft)
+  scheduledAt     DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  createdById     String
+
+  createdBy User        @relation(fields: [createdById], references: [id])
+  targets   BlastTarget[]
+  groups    BlastGroup[]
+
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([createdById])
+}
+
+model BlastTarget {
+  id           String       @id @default(cuid())
+  blastId      String
+  contactId    String
+  status       TargetStatus @default(pending)
+  sentAt       DateTime?
+  readAt       DateTime?
+  errorMessage String?
+  messageId    String?
+
+  blast   Blast   @relation(fields: [blastId], references: [id], onDelete: Cascade)
+  contact Contact @relation(fields: [contactId], references: [id])
+
+  @@index([blastId])
+  @@index([status])
+}
+
+model BlastGroup {
+  blastId String
+  groupId String
+
+  blast Blast        @relation(fields: [blastId], references: [id], onDelete: Cascade)
+  group ContactGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@id([blastId, groupId])
+}
+
+model MessageTemplate {
+  id        String   @id @default(cuid())
+  name      String
+  body      String   @db.Text
+  footer    String?  @db.Text
+  imageUrl  String?
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
