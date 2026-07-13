@@ -2,7 +2,8 @@ import { getServerSession } from "next-auth";
 import { redirect, notFound } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { TemplateForm } from "@/components/dashboard/TemplateForm";
-import { getTemplate, updateTemplate } from "@/lib/actions/templates";
+import { getTemplate } from "@/lib/actions/templates";
+import { updateTemplateAction } from "./actions";
 
 interface Props {
   params: { id: string };
@@ -36,7 +37,7 @@ export default async function EditTemplatePage({ params }: Props) {
           footer: template.footer || "",
           imageUrl: template.imageUrl || "",
         }}
-        onSubmit={(data) => updateTemplate(params.id, data)}
+        onSubmit={(data) => updateTemplateAction(params.id, data)}
         isEditing
       />
     </div>
