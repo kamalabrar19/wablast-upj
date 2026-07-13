@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { templateSchema, type TemplateInput } from "@/lib/validations/template";
+import { createTemplate, updateTemplate } from "@/lib/actions/templates";
 
 const PREDEFINED_VARS = [
   { label: "Nama", value: "nama" },
@@ -19,14 +20,14 @@ const PREDEFINED_VARS = [
 
 interface TemplateFormProps {
   defaultValues?: TemplateInput;
-  onSubmit: (data: TemplateInput) => Promise<{ error?: string } | undefined>;
-  isEditing?: boolean;
+  templateId?: string;
 }
 
-export function TemplateForm({ defaultValues, onSubmit, isEditing }: TemplateFormProps) {
+export function TemplateForm({ defaultValues, templateId }: TemplateFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const isEditing = !!templateId;
 
   const {
     register,
@@ -73,7 +74,9 @@ export function TemplateForm({ defaultValues, onSubmit, isEditing }: TemplateFor
   async function onFormSubmit(data: TemplateInput) {
     setIsLoading(true);
     try {
-      const result = await onSubmit(data);
+      const result = isEditing
+        ? await updateTemplate(templateId!, data)
+        : await createTemplate(data);
       if (result?.error) {
         toast.error(result.error);
       } else {

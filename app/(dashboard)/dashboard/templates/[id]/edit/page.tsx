@@ -3,7 +3,6 @@ import { redirect, notFound } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { TemplateForm } from "@/components/dashboard/TemplateForm";
 import { getTemplate } from "@/lib/actions/templates";
-import { updateTemplateAction } from "./actions";
 
 interface Props {
   params: { id: string };
@@ -31,14 +30,13 @@ export default async function EditTemplatePage({ params }: Props) {
       </div>
 
       <TemplateForm
+        templateId={params.id}
         defaultValues={{
           name: template.name,
           body: template.body,
           footer: template.footer || "",
           imageUrl: template.imageUrl || "",
         }}
-        onSubmit={(data) => updateTemplateAction(params.id, data)}
-        isEditing
       />
     </div>
   );

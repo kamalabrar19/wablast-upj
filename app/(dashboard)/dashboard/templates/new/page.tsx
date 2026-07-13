@@ -2,7 +2,6 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { TemplateForm } from "@/components/dashboard/TemplateForm";
-import { createTemplate } from "@/lib/actions/templates";
 
 export default async function NewTemplatePage() {
   const session = await getServerSession(authOptions);
@@ -20,7 +19,7 @@ export default async function NewTemplatePage() {
         </p>
       </div>
 
-      <TemplateForm onSubmit={createTemplate} />
+      <TemplateForm />
     </div>
   );
 }
