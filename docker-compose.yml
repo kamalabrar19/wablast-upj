@@ -35,7 +35,7 @@ services:
     container_name: wablast-app
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       DATABASE_URL: postgresql://wablast:${DB_PASSWORD:-changeme}@postgres:5432/wablast_upj?schema=public
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}

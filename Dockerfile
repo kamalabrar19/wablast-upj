@@ -31,6 +31,9 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
+# Install prisma CLI di runner stage (pin versi 5)
+RUN npm install prisma@5.19.0
+
 RUN chown -R nextjs:nodejs /app
 
 USER nextjs
