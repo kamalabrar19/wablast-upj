@@ -77,7 +77,6 @@ export async function createBlast(formData: FormData) {
   });
 
   startBlastWorker();
-  processBlasts().catch(console.error);
 
   revalidatePath("/dashboard/blast");
   revalidatePath("/dashboard/schedule");
@@ -92,7 +91,6 @@ export async function getBlasts(
   endDate?: string
 ) {
   startBlastWorker();
-  if (page === 1) processBlasts().catch(console.error);
 
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return { data: [], total: 0, totalPages: 0 };

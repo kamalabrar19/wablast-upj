@@ -10,7 +10,20 @@ export class BaileysProvider implements WhatsAppProvider {
         ? message.to
         : `${message.to}@s.whatsapp.net`;
 
-      const result = await this.sock.sendMessage(jid, { text: message.text });
+      let result;
+      if (message.imageUrl) {
+        result = await this.sock.sendMessage(jid, {
+          image: { url: message.imageUrl },
+          caption: message.text,
+          footer: message.footer,
+        });
+      } else if (message.footer) {
+        result = await this.sock.sendMessage(jid, {
+          text: `${message.text}\n\n${message.footer}`,
+        });
+      } else {
+        result = await this.sock.sendMessage(jid, { text: message.text });
+      }
 
       return {
         success: true,

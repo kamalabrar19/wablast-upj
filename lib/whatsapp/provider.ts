@@ -10,6 +10,8 @@
 export interface WhatsAppMessage {
   to: string;
   text: string;
+  imageUrl?: string;
+  footer?: string;
 }
 
 export interface WhatsAppResult {
